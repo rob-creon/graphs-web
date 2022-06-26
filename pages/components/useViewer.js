@@ -8,7 +8,7 @@ function getWindowDimensions() {
     };
 }
 
-const useViewer = (draw, mouseListener, clickListener) => {
+const useViewer = (draw, mouseListener, clickListener, overListener) => {
 
     const canvasRef = useRef(null)
     const frameCtr = useRef(0)
@@ -31,10 +31,17 @@ const useViewer = (draw, mouseListener, clickListener) => {
         canvas.addEventListener("mouseup", (event) => {
             clickListener(false)
         })
+        canvas.addEventListener("mouseleave", (event) => {
+            overListener(false)
+        })
+        canvas.addEventListener("mouseenter", (event) => {
+            overListener(true)
+        })
 
         const render = () => {
             frameCtr.current++
-            const { width, height } = getWindowDimensions()
+            const width = canvas.parentElement.offsetWidth-4 //TODO insanely stupid hack
+            const height = canvas.parentElement.offsetHeight-4 //TODO insanely stupid hack
             if (canvas.width !== width || canvas.height !== height) {
                 canvas.width = width
                 canvas.height = height
@@ -49,7 +56,7 @@ const useViewer = (draw, mouseListener, clickListener) => {
         return () => {
             window.cancelAnimationFrame(frameID)
         }
-    }, [draw, frameCtr, mouseListener])
+    }, [clickListener, draw, frameCtr, mouseListener, overListener])
 
     return canvasRef
 }

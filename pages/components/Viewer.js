@@ -2,18 +2,21 @@ import React, {useCallback, useRef, useState} from "react"
 import useViewer from "./useViewer";
 import {matrix, multiply, norm, inv, subtract, number, index, distance} from 'mathjs'
 
+const cameraX = 0
+const cameraY = 0
+
 function rgb(r, g, b) {
     return "rgb(" + r + "," + g + "," + b + ")";
 }
 
 function getProjectionMatrix(width, height) {
 
-    let ratio = height/width
+    console.log("w=", width, "h=", height)
 
-    let right = width
-    let left = 0
-    let top = 0
-    let bottom = height/ratio
+    let right = width/2
+    let left = -width/2
+    let top = -width/2
+    let bottom = width/2
     let far = 10
     let near = -10
 
@@ -29,9 +32,24 @@ function getInverseProjectionMatrix(width, height) {
     return inv(getProjectionMatrix(width, height))
 }
 
-const Viewer = graph => {
+function coordToScreen(ctx, x, y) {
+    const projMatrix = getProjectionMatrix(ctx.canvas.width, ctx.canvas.height)
+    const srcPos = matrix([x, y, 1, 1])
+    const projSrcPos = multiply(projMatrix, srcPos)
+    return matrix([projSrcPos.get([0]) + ctx.canvas.width/2, projSrcPos.get([1]) + ctx.canvas.height/2])
+}
+
+function screenToCoord(ctx, x, y) {
+    const projMatrix = getInverseProjectionMatrix(ctx.canvas.width, ctx.canvas.height)
+    const srcPos = matrix([x - ctx.canvas.width/2, y - ctx.canvas.height/2, 1, 1])
+    const projSrcPos = multiply(projMatrix, srcPos)
+    return matrix([projSrcPos.get([0]), projSrcPos.get([1])])
+}
+
+const Viewer = props => {
 
     let mouse = {x: 0, y: 0}
+    let mouseOver = useRef(false)
     let mouseDown = useRef(false)
     let mouseClick = useRef(false)
     let dragTarget = useRef(null)
@@ -40,29 +58,30 @@ const Viewer = graph => {
 
     const draw = useCallback((ctx, frame) => {
 
-        if(!mouseDown.current) {
+        if (!mouseDown.current) {
             dragTarget.current = null
         }
 
         // Update Mouse
-        const projMouse = multiply(getInverseProjectionMatrix(ctx.canvas.width, ctx.canvas.height), matrix([mouse.x, mouse.y, 1, 1])).subset(index([0, 1]))
-        setCursor('default')
-        graph.graph.forEach((node, index) => {
-            const nodePos = matrix([node.position[0], node.position[1]])
-            const dist = distance(projMouse, nodePos)
+        if (mouseOver.current) {
+            setCursor('default')
+            // const projMouse = multiply(getInverseProjectionMatrix(ctx.canvas.width, ctx.canvas.height), matrix([mouse.x, mouse.y, 1, 1])).subset(index([0, 1]))
+            const projMouse = screenToCoord(ctx, mouse.x, mouse.y)
+            props.graph.forEach((node, index) => {
+                const nodePos = matrix([node.position[0], node.position[1]])
+                const dist = distance(projMouse, nodePos)
 
-            if (dist <= node.size) {
-                setCursor('pointer')
-
-                if (mouseClick.current) {
-                    dragTarget.current = index
+                if (dist <= node.size) {
+                    setCursor('pointer')
+                    if (dragTarget.current === null) {
+                        dragTarget.current = index
+                    }
                 }
-            }
-
-            if (mouseDown.current && dragTarget.current === index) {
-                node.position = [projMouse.get([0]), projMouse.get([1])]
-            }
-        })
+                if (mouseDown.current && dragTarget.current === index) {
+                    node.position = [projMouse.get([0]), projMouse.get([1])]
+                }
+            })
+        }
 
         // Clear the canvas
         ctx.fillStyle = '#2d3846'
@@ -71,15 +90,17 @@ const Viewer = graph => {
         const projMatrix = getProjectionMatrix(ctx.canvas.width, ctx.canvas.height)
 
         // Render the edges
-        graph.graph.forEach(src => {
+        props.graph.forEach(src => {
             src.adj.forEach(dstInd => {
-                const dst = graph.graph[dstInd]
+                const dst = props.graph[dstInd]
 
-                const srcPos = matrix([src.position[0], src.position[1], 1, 1])
-                const projSrcPos = multiply(projMatrix, srcPos)
+                // const srcPos = matrix([src.position[0], src.position[1], 1, 1])
+                // const projSrcPos = multiply(projMatrix, srcPos)
+                const projSrcPos = coordToScreen(ctx, src.position[0], src.position[1])
 
-                const dstPos = matrix([dst.position[0], dst.position[1], 1, 1])
-                const projDstPos = multiply(projMatrix, dstPos)
+                // const dstPos = matrix([dst.position[0], dst.position[1], 1, 1])
+                // const projDstPos = multiply(projMatrix, dstPos)
+                const projDstPos = coordToScreen(ctx, dst.position[0], dst.position[1])
 
                 ctx.strokeStyle = '#c9e6f6'
                 ctx.beginPath()
@@ -90,11 +111,12 @@ const Viewer = graph => {
         })
 
         // Render the vertices
-        const numNodes = graph.graph.length
+        const numNodes = props.graph.length
         const nodeAnimIncr = (Math.PI) / numNodes
-        graph.graph.forEach((node, index) => {
-            const pos = matrix([node.position[0], node.position[1], 1, 1])
-            const projPos = multiply(projMatrix, pos)
+        props.graph.forEach((node, index) => {
+            // const pos = matrix([node.position[0], node.position[1], 1, 1])
+            // const projPos = multiply(projMatrix, pos)
+            const projPos = coordToScreen(ctx, node.position[0], node.position[1])
 
             const origin = multiply(projMatrix, matrix([0, 0, 1, 1]))
             const tmp = multiply(projMatrix, matrix([node.size, node.size, 1, 1]))
@@ -102,7 +124,11 @@ const Viewer = graph => {
 
             const animSpeed = 0.02
             const animOffset = index * nodeAnimIncr
-            const animFactor = Math.sin(animOffset + (frame * animSpeed))**2
+            let animFactor = Math.sin(animOffset + (frame * animSpeed)) ** 2
+
+            if (!props.animationEnabled.current) {
+                animFactor = 0
+            }
 
             const minSize = projNodeSize * 0.8
             const sizeOffset = projNodeSize - minSize
@@ -120,20 +146,29 @@ const Viewer = graph => {
             ctx.fill()
         })
 
-        ctx.beginPath()
-        ctx.fillText("X: " + mouse.x + ", Y: " + mouse.y, 10, 20);
-        ctx.fillText("dragTarget: " + dragTarget.current, 10, 40)
+        if (mouseOver.current) {
+            // ctx.beginPath()
+            // ctx.fillText("X: " + mouse.x + ", Y: " + mouse.y, 10, 20);
+            // ctx.fillText("dragTarget: " + dragTarget.current, 10, 40)
+        }
 
-    }, [graph.graph, mouse.x, mouse.y, mouseClick, mouseDown])
+    }, [props.graph, mouse.x, mouse.y, mouseDown, mouseOver, props.animationEnabled])
 
-    const canvasRef = useViewer(draw, (m) => mouse = m, (c) => {
-        mouseClick.current = !mouseDown.current;
-        mouseDown.current = c
-    })
+    const canvasRef = useViewer(draw,
+        (m) => {
+            mouse = m
+        },
+        (c) => {
+            mouseClick.current = !mouseDown.current
+            mouseDown.current = c
+        },
+        (o) => {
+            mouseOver.current = o
+        })
 
-    return <div className="viewer">
+    return (
         <canvas ref={canvasRef} style={{cursor: cursor}}/>
-    </div>
+    )
 }
 
 export default Viewer
