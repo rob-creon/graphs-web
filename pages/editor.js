@@ -43,7 +43,7 @@ const Editor = () => {
 
             <Split className={styles.split}>
                 <div className={styles.splitViewer}>
-                    <Viewer graph={createCircleGraph(12)} animationEnabled={animationEnabled}/>
+                    <Viewer graph={createConnectedGraph(12)} animationEnabled={animationEnabled}/>
                 </div>
                 <div className={styles.splitMath}/>
             </Split>
