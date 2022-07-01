@@ -213,6 +213,7 @@ const Viewer = props => {
             onMouseClickEdge: (e) => {
                 e[0].adj.splice(e[0].adj.indexOf(e[1]), 1)
                 e[1].adj.splice(e[1].adj.indexOf(e[0]), 1)
+                updateGraph(graph)
             },
             onMouseDragVertex: (v, m) => {
 
@@ -372,11 +373,11 @@ const Viewer = props => {
         })
 
         if (mouseOver.current) {
-            ctx.beginPath()
-            ctx.fillText("X: " + mouse.x + ", Y: " + mouse.y, 10, 20);
-            ctx.fillText("dragTarget: " + dragTarget.current, 10, 40)
-            ctx.fillText("click: " + mouseClick.current, 10, 60)
-            ctx.fillText("down: " + mouseDown.current, 10, 80)
+            // ctx.beginPath()
+            // ctx.fillText("X: " + mouse.x + ", Y: " + mouse.y, 10, 20);
+            // ctx.fillText("dragTarget: " + dragTarget.current, 10, 40)
+            // ctx.fillText("click: " + mouseClick.current, 10, 60)
+            // ctx.fillText("down: " + mouseDown.current, 10, 80)
         }
         mouseClick.current = false
 
