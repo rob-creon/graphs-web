@@ -1,6 +1,6 @@
 import React from 'react'
 import Switch from 'react-switch'
-import styles from '../../styles/Editor.module.css'
+import styles from '../styles/Editor.module.css'
 
 const EditorSwitch = props => {
     const [checked, setChecked] = React.useState(props.initialChecked)

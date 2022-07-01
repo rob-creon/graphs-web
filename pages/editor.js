@@ -1,11 +1,11 @@
 import Head from "next/head"
 import React from "react"
-import Viewer from "./components/Viewer"
-import MathView from "./components/MathView"
-import Layout from "./components/Layout"
+import Viewer from "../components/Viewer"
+import MathView from "../components/MathView"
+import Layout from "../components/Layout"
 import styles from '../styles/Editor.module.css'
-import EditorSwitch from './components/EditorSwitch'
-import {createConnectedGraph, createCircleGraph} from "./components/Graph";
+import EditorSwitch from '../components/EditorSwitch'
+import {createConnectedGraph, createCircleGraph} from "../components/Graph";
 import Split from "react-split";
 
 const Editor = () => {
