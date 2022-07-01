@@ -1,18 +1,49 @@
 import Head from "next/head"
 import React from "react"
 import Viewer from "./components/Viewer"
+import MathView from "./components/MathView"
 import Layout from "./components/Layout"
 import styles from '../styles/Editor.module.css'
 import EditorSwitch from './components/EditorSwitch'
 import {createConnectedGraph, createCircleGraph} from "./components/Graph";
-import 'katex/dist/katex.min.css';
-import TeX from '@matejmazur/react-katex';
 import Split from "react-split";
 
 const Editor = () => {
 
+    const [graph, setGraph] = React.useState(createConnectedGraph(10))
+
     const animationEnabled = React.useRef(true)
-    const displayMat = React.useRef(false)
+    const [tool, setTool] = React.useState('MoveVertex')
+    const [showMath, setShowMath] = React.useState(false)
+
+    const GetViewer = () => {
+        return (
+            <div className={styles.splitViewer}>
+                <Viewer graph={graph} animationEnabled={animationEnabled} tool={tool} updateGraph={(g) => {
+                    setGraph([...g])
+                }}/>
+            </div>
+        )
+    }
+
+    const SplitView = () => {
+        if (showMath) {
+            return (
+                <Split className={styles.split} sizes={[70, 30]}>
+                    {GetViewer()}
+                    <div className={styles.splitMath} hidden={showMath.current}>
+                        <MathView graph={graph}/>
+                    </div>
+                </Split>
+            )
+        } else {
+            return (
+                <div className={styles.split}>
+                    {GetViewer()}
+                </div>
+            )
+        }
+    }
 
     return (<Layout>
             <Head>
@@ -24,14 +55,30 @@ const Editor = () => {
             </Head>
 
             <div className={styles.navbar}>
-                {/*<TeX block className={styles.latex}>*/}
-                {/*    {"\\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\end{pmatrix}"}*/}
-                {/*</TeX>*/}
-                {/*<button className={styles.button} onClick={() => {*/}
-                {/*}}>Adjacency Matrix*/}
-                {/*</button>*/}
+
+                <button className={styles.button}
+                        onClick={() => setTool('MoveVertex')}
+                        style={tool === 'MoveVertex' ? {color: '#51ffed'} : {}}
+                >Move
+                </button>
+                <button className={styles.button}
+                        onClick={() => setTool('AddVertex')}
+                        style={tool === 'AddVertex' ? {color: '#51ffed'} : {}}
+                >Add Vertex
+                </button>
+                <button className={styles.button}
+                        onClick={() => setTool('AddEdge')}
+                        style={tool === 'AddEdge' ? {color: '#51ffed'} : {}}
+                >Add Edge
+                </button>
+                <button className={styles.button}
+                        onClick={() => setTool('Eraser')}
+                        style={tool === 'Eraser' ? {color: '#51ffed'} : {}}
+                >Eraser
+                </button>
                 <button className={styles.button} onClick={() => {
-                }}>View Matrix Info
+                    setShowMath(!showMath)
+                }}>{showMath ? "Hide Math" : "Show Math"}
                 </button>
                 {/*<EditorSwitch name="Matrix Info" initialChecked={displayMat.current} onChange={(c)=>{*/}
                 {/*    displayMat.current = c*/}
@@ -40,17 +87,9 @@ const Editor = () => {
                     animationEnabled.current = c
                 }}/>
             </div>
-
-            <Split className={styles.split}>
-                <div className={styles.splitViewer}>
-                    <Viewer graph={createConnectedGraph(12)} animationEnabled={animationEnabled}/>
-                </div>
-                <div className={styles.splitMath}/>
-            </Split>
+            {SplitView()}
 
         </Layout>
-
-
     )
 }
 
