@@ -14,7 +14,7 @@ const Editor = () => {
 
     const animationEnabled = React.useRef(true)
     const [tool, setTool] = React.useState('MoveVertex')
-    const [showMath, setShowMath] = React.useState(false)
+    const [showMath, setShowMath] = React.useState(true)
 
     const GetViewer = () => {
         return (
