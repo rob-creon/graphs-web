@@ -16,6 +16,16 @@
     background-color: #252f3a;
 }
 
+.mathrow {
+    height: min-content;
+    padding: 0.3rem 0;
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: flex-start;
+}
+
 .button {
     background-color: #8041da; /* Green */
     border: none;
@@ -33,6 +43,26 @@
 
 .button:hover {
     background-color: rgba(128, 65, 218, 0.8);
+}
+
+.buttonmath {
+    background-color: #789194; /* Green */
+    border: none;
+    color: white;
+    padding: 0.5%;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: large;
+    cursor: pointer;
+    border-radius: 4px;
+    float: left;
+    margin-top: 2px;
+    margin-left: 4px;
+}
+
+.buttonmath:hover {
+    background-color: #2d986e;
 }
 
 .switch {
@@ -56,6 +86,9 @@
     border-radius: 8px;
 }
 
+.input {
+    text-align: left;
+}
 .latex {
     color: rgb(201, 206, 208)
 }

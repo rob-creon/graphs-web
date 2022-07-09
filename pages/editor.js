@@ -5,21 +5,23 @@ import MathView from "../components/MathView"
 import Layout from "../components/Layout"
 import styles from '../styles/Editor.module.css'
 import EditorSwitch from '../components/EditorSwitch'
-import {createConnectedGraph, createCircleGraph} from "../components/Graph";
+import {createConnectedGraph, createCircleGraph} from "../components/math/Graph";
 import Split from "react-split";
 
 const Editor = () => {
 
-    const [graph, setGraph] = React.useState(createConnectedGraph(10))
+    const [graph, setGraph] = React.useState(createConnectedGraph(8))
 
-    const animationEnabled = React.useRef(true)
+    const animationEnabled = React.useRef(false)
+    const vertexLabelsEnabled = React.useRef(true)
     const [tool, setTool] = React.useState('MoveVertex')
     const [showMath, setShowMath] = React.useState(true)
 
     const GetViewer = () => {
         return (
             <div className={styles.splitViewer}>
-                <Viewer graph={graph} animationEnabled={animationEnabled} tool={tool} updateGraph={(g) => {
+                <Viewer graph={graph} animationEnabled={animationEnabled} vertexLabelsEnabled={vertexLabelsEnabled}
+                        tool={tool} updateGraph={(g) => {
                     setGraph([...g])
                 }}/>
             </div>
@@ -80,11 +82,11 @@ const Editor = () => {
                     setShowMath(!showMath)
                 }}>{showMath ? "Hide Math" : "Show Math"}
                 </button>
-                {/*<EditorSwitch name="Matrix Info" initialChecked={displayMat.current} onChange={(c)=>{*/}
-                {/*    displayMat.current = c*/}
-                {/*}}/>*/}
                 <EditorSwitch name="Animation" initialChecked={animationEnabled.current} onChange={(c) => {
                     animationEnabled.current = c
+                }}/>
+                <EditorSwitch name="Vertex Labels" initialChecked={vertexLabelsEnabled.current} onChange={(c) => {
+                    vertexLabelsEnabled.current = c
                 }}/>
             </div>
             {SplitView()}

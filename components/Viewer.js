@@ -1,7 +1,7 @@
 import React, {useCallback, useRef, useState} from "react"
 import useViewer from "./useViewer";
 import {matrix, multiply, norm, inv, subtract, number, index, distance} from 'mathjs'
-import {disconnectVert} from "./Graph";
+import {disconnectVert} from "./math/Graph";
 
 function rgb(r, g, b) {
     return "rgb(" + r + "," + g + "," + b + ")";
@@ -115,7 +115,7 @@ const Viewer = props => {
                         index: graph.length,
                         position: [m.get([0]), m.get([1])],
                         adj: [],
-                        size: 0.01
+                        size: 0.015
                     }
                 )
                 updateGraph(graph)
@@ -370,6 +370,17 @@ const Viewer = props => {
             ctx.beginPath()
             ctx.arc(projPos.get([0]), projPos.get([1]), finalSize, 0, 2 * Math.PI)
             ctx.fill()
+
+            if (props.vertexLabelsEnabled.current) {
+                ctx.fillStyle = '#ffffff'
+                ctx.font = finalSize * 8 + '% sans-serif';
+
+                const textWidth = ctx.measureText(node.index+1).width;
+
+                ctx.beginPath()
+                ctx.fillText(node.index+1, projPos.get([0]) - textWidth / 2, projPos.get([1]) + finalSize/2)
+                ctx.stroke()
+            }
         })
 
         if (mouseOver.current) {
