@@ -12,8 +12,8 @@ const Editor = () => {
 
     const [graph, setGraph] = React.useState(createConnectedGraph(8))
 
-    const animationEnabled = React.useRef(false)
-    const vertexLabelsEnabled = React.useRef(true)
+    const animationEnabled = React.useRef(true)
+    const vertexLabelsEnabled = React.useRef(false)
     const [tool, setTool] = React.useState('MoveVertex')
     const [showMath, setShowMath] = React.useState(true)
 
@@ -34,7 +34,9 @@ const Editor = () => {
                 <Split className={styles.split} sizes={[70, 30]}>
                     {GetViewer()}
                     <div className={styles.splitMath} hidden={showMath.current}>
-                        <MathView graph={graph}/>
+                        <MathView graph={graph} updateGraph={(g) => {
+                            setGraph([...g])
+                        }}/>
                     </div>
                 </Split>
             )

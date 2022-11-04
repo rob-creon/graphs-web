@@ -8,6 +8,7 @@ import ViewSummary from './math/ViewSummary'
 import ViewMatrices from "./math/ViewMatrices";
 import ViewWalks from "./math/ViewWalks";
 import {getGraphInfo} from "./math/Graph";
+import ViewDrawings from "./math/ViewDrawings";
 
 // import styles from '../../styles/Editor.module.css'
 
@@ -34,9 +35,10 @@ const MathView = (props) => {
     if (props.graph.length > 0) {
         const graphInfo = getGraphInfo(props.graph)
         const Views = {
-            summary: (<ViewSummary graphInfo={graphInfo}/>),
-            matrices: (<ViewMatrices graphInfo={graphInfo}/>),
-            walks: (<ViewWalks graphInfo={graphInfo}/>),
+            summary: (<ViewSummary graphInfo={graphInfo} updateGraph={props.updateGraph}/>),
+            matrices: (<ViewMatrices graphInfo={graphInfo} updateGraph={props.updateGraph}/>),
+            walks: (<ViewWalks graphInfo={graphInfo} updateGraph={props.updateGraph}/>),
+            drawings: (<ViewDrawings graphInfo={graphInfo} updateGraph={props.updateGraph}/>),
         }
 
         return (
@@ -45,6 +47,7 @@ const MathView = (props) => {
                     <MathButton name={'summary'} mode={mode} setMode={setMode} color={'#ff7f7f'}>Summary</MathButton>
                     <MathButton name={'matrices'} mode={mode} setMode={setMode} color={'#ff9975'}>Matrices</MathButton>
                     <MathButton name={'walks'} mode={mode} setMode={setMode} color={'#ffe07a'}>k-walks</MathButton>
+                    <MathButton name={'drawings'} mode={mode} setMode={setMode} color={'#c3ff7a'}>Drawings</MathButton>
                 </div>
                 {Views[mode]}
             </>

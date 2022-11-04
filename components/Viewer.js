@@ -1,7 +1,7 @@
 import React, {useCallback, useRef, useState} from "react"
 import useViewer from "./useViewer";
 import {matrix, multiply, norm, inv, subtract, number, index, distance} from 'mathjs'
-import {disconnectVert} from "./math/Graph";
+import {disconnectVert, VERTEX_SIZE} from "./math/Graph";
 
 function rgb(r, g, b) {
     return "rgb(" + r + "," + g + "," + b + ")";
@@ -51,16 +51,20 @@ function getInverseProjectionMatrix(width, height) {
     return inv(getProjectionMatrix(width, height))
 }
 
+let zoom = 1
+const cameraX = 0
+const cameraY = 0
+
 function coordToScreen(ctx, x, y) {
     const projMatrix = getProjectionMatrix(ctx.canvas.width, ctx.canvas.height)
-    const srcPos = matrix([x, y, 1, 1])
+    const srcPos = matrix([(x - cameraX) * zoom, (y - cameraY) * zoom, 1, 1])
     const projSrcPos = multiply(projMatrix, srcPos)
     return matrix([projSrcPos.get([0]) + ctx.canvas.width / 2, projSrcPos.get([1]) + ctx.canvas.height / 2])
 }
 
 function coordToScreenVec(ctx, vec) {
     const projMatrix = getProjectionMatrix(ctx.canvas.width, ctx.canvas.height)
-    const srcPos = matrix([vec.get([0]), vec.get([1]), 1, 1])
+    const srcPos = matrix([(vec.get([0]) - cameraX) * zoom, (vec.get([1]) - cameraY) * zoom, 1, 1])
     const projSrcPos = multiply(projMatrix, srcPos)
     return matrix([projSrcPos.get([0]) + ctx.canvas.width / 2, projSrcPos.get([1]) + ctx.canvas.height / 2])
 }
@@ -69,7 +73,7 @@ function screenToCoord(ctx, x, y) {
     const projMatrix = getInverseProjectionMatrix(ctx.canvas.width, ctx.canvas.height)
     const srcPos = matrix([x - ctx.canvas.width / 2, y - ctx.canvas.height / 2, 1, 1])
     const projSrcPos = multiply(projMatrix, srcPos)
-    return matrix([projSrcPos.get([0]), projSrcPos.get([1])])
+    return matrix([projSrcPos.get([0]) / zoom + cameraX, projSrcPos.get([1]) / zoom + cameraY])
 }
 
 const Viewer = props => {
@@ -98,6 +102,7 @@ const Viewer = props => {
             },
             onMouseDragVertex: (v, m) => {
                 v.position = [m.get([0]), m.get([1])]
+                updateGraph(graph)
             }
         },
         AddVertex: {
@@ -115,7 +120,7 @@ const Viewer = props => {
                         index: graph.length,
                         position: [m.get([0]), m.get([1])],
                         adj: [],
-                        size: 0.015
+                        size: VERTEX_SIZE
                     }
                 )
                 updateGraph(graph)
@@ -375,10 +380,10 @@ const Viewer = props => {
                 ctx.fillStyle = '#ffffff'
                 ctx.font = finalSize * 8 + '% sans-serif';
 
-                const textWidth = ctx.measureText(node.index+1).width;
+                const textWidth = ctx.measureText(node.index + 1).width;
 
                 ctx.beginPath()
-                ctx.fillText(node.index+1, projPos.get([0]) - textWidth / 2, projPos.get([1]) + finalSize/2)
+                ctx.fillText(node.index + 1, projPos.get([0]) - textWidth / 2, projPos.get([1]) + finalSize / 2)
                 ctx.stroke()
             }
         })

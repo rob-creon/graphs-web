@@ -9,6 +9,9 @@ import {colVectorsOfMatrix, matrixToLatex} from "./Graph";
 const ViewMatrices = (props) => {
     const math = props.graphInfo.math
     if(props.graphInfo.n > 1) {
+        const transitionMatrix = math.multiply(math.inv(props.graphInfo.degree.matrix), props.graphInfo.adjacency.matrix)
+        const transitionMatrixEigs = math.eigs(transitionMatrix)
+
         return (
             <>
                 <TeX block>
@@ -25,6 +28,18 @@ const ViewMatrices = (props) => {
                 </TeX>
                 <TeX block>
                     {'\\lambda(L_G)=' + props.graphInfo.laplace.eigs.values.map((e) => math.round(e, 3))}
+                </TeX>
+                <TeX block>
+                    {'\\Psi(L_G)={' + colVectorsOfMatrix(props.graphInfo.laplace.eigs.vectors).map((e) => matrixToLatex(e)) + '}'}
+                </TeX>
+                <TeX block>
+                    {'T_G=D_G^{-1}A_G=' + matrixToLatex(transitionMatrix)}
+                </TeX>
+                <TeX block>
+                    {'\\lambda(T_G)=' + transitionMatrixEigs.values.map((e) => math.round(e, 3))}
+                </TeX>
+                <TeX block>
+                    {'\\Psi(T_G)={' + colVectorsOfMatrix(transitionMatrixEigs.vectors).map((e) => matrixToLatex(e)) + '}'}
                 </TeX>
             </>
         )
